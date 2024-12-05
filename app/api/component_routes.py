@@ -257,157 +257,157 @@ def update_component_status(component_id):
         }), 500
 
 
-    # @api_bp.route('/phones/createByBatch', methods=['POST'])
-# def create_phones_by_batch():
-#     """Create phones in a batch"""
-#     try:
-#         data = request.get_json()
-#         batch_number = data.get('batch_number')
-#         count = data.get('count')
-#
-#         if not batch_number or not count:
-#             return jsonify({
-#                 'message': 'Missing required parameters',
-#                 'details': 'batch_number and count are required'
-#             }), 400
-#
-#         created_phones = create_components_by_batch(Phone, batch_number, count)
-#
-#         return jsonify({
-#             'message': 'Phones created successfully',
-#             'created_items': [{
-#                 'phone_ID': phone.id,
-#                 'created_at': phone.created_at,
-#                 'status': phone.status,
-#                 'discarded_at': phone.discarded_at
-#             } for phone in created_phones]
-#         }), 201
-#     except Exception as e:
-#         return jsonify({
-#             'message': 'Error creating phones',
-#             'details': str(e)
-#         }), 400
-#
-# @api_bp.route('/SIM_cards/createByBatch', methods=['POST'])
-# def create_sim_cards_by_batch():
-#     """Create simcards in a batch"""
-#     try:
-#         data = request.get_json()
-#         batch_number = data.get('batch_number')
-#         count = data.get('count')
-#
-#         if not batch_number or not count:
-#             return jsonify({
-#                 'message': 'Missing required parameters',
-#                 'details': 'batch_number and count are required'
-#             }), 400
-#
-#         created_sim_cards = create_components_by_batch(SimCard, batch_number, count)
-#
-#         return jsonify({
-#             'message': 'SIM cards created successfully',
-#             'created_items': [{
-#                 'SIM_card_ID': sim.id,
-#                 'created_at': sim.created_at,
-#                 'status': sim.status,
-#                 'discarded_at': sim.discarded_at
-#             } for sim in created_sim_cards]
-#         }), 201
-#     except Exception as e:
-#         return jsonify({
-#             'message': 'Error creating SIM cards',
-#             'details': str(e)
-#         }), 400
-#
-# @api_bp.route('/right_sensors/createByBatch', methods=['POST'])
-# def create_right_sensors_by_batch():
-#     """Create right-sensors in a batch"""
-#     try:
-#         data = request.get_json()
-#         batch_number = data.get('batch_number')
-#         count = data.get('count')
-#
-#         if not batch_number or not count:
-#             return jsonify({
-#                 'message': 'Missing required parameters',
-#                 'details': 'batch_number and count are required'
-#             }), 400
-#
-#         created_sensors = create_components_by_batch(RightSensor, batch_number, count)
-#
-#         return jsonify({
-#             'message': 'Right sensors created successfully',
-#             'created_items': [{
-#                 'right_sensor_ID': sensor.id,
-#                 'created_at': sensor.created_at,
-#                 'status': sensor.status,
-#                 'discarded_at': sensor.discarded_at
-#             } for sensor in created_sensors]
-#         }), 201
-#     except Exception as e:
-#         return jsonify({
-#             'message': 'Error creating right sensors',
-#             'details': str(e)
-#         }), 400
-#
-# @api_bp.route('/left_sensors/createByBatch', methods=['POST'])
-# def create_left_sensors_by_batch():
-#     """Create left sensors in a batch"""
-#     try:
-#         data = request.get_json()
-#         batch_number = data.get('batch_number')
-#         count = data.get('count')
-#
-#         if not batch_number or not count:
-#             return jsonify({
-#                 'message': 'Missing required parameters',
-#                 'details': 'batch_number and count are required'
-#             }), 400
-#
-#         created_sensors = create_components_by_batch(LeftSensor, batch_number, count)
-#
-#         return jsonify({
-#             'message': 'Left sensors created successfully',
-#             'created_items': [{
-#                 'left_sensor_ID': sensor.id,
-#                 'created_at': sensor.created_at,
-#                 'status': sensor.status,
-#                 'discarded_at': sensor.discarded_at
-#             } for sensor in created_sensors]
-#         }), 201
-#     except Exception as e:
-#         return jsonify({
-#             'message': 'Error creating left sensors',
-#             'details': str(e)
-#         }), 400
-#
-# @api_bp.route('/headphones/createByBatch', methods=['POST'])
-# def create_headphones_by_batch():
-#     """Create headphones in a batch"""
-#     try:
-#         data = request.get_json()
-#         batch_number = data.get('batch_number')
-#         count = data.get('count')
-#
-#         if not batch_number or not count:
-#             return jsonify({
-#                 'message': 'Missing required parameters',
-#                 'details': 'batch_number and count are required'
-#             }), 400
-#
-#         created_headphones = create_components_by_batch(Headphone, batch_number, count)
-#
-#         return jsonify({
-#             'message': 'Headphones created successfully',
-#             'created_items': [{
-#                 'headphone_ID': headphone.id,
-#                 'created_at': headphone.created_at,
-#                 'status': headphone.status,
-#                 'discarded_at': headphone.discarded_at
-#             } for headphone in created_headphones]
-#         }), 201
-#     except Exception as e:
-#         return jsonify({
-#             'message': 'Error creating headphones',
-#             'details': str(e)
-#         }), 400
+@api_bp.route('/phones/createByBatch', methods=['POST'])
+def create_phones_by_batch():
+    """Create phones in a batch"""
+    try:
+        data = request.get_json()
+        batch_number = data.get('batch_number')
+        count = data.get('count')
+
+        if not batch_number or not count:
+            return jsonify({
+                'message': 'Missing required parameters',
+                'details': 'batch_number and count are required'
+            }), 400
+
+        created_phones = create_components_by_batch(Phone, batch_number, count)
+
+        return jsonify({
+            'message': 'Phones created successfully',
+            'created_items': [{
+                'phone_ID': phone.id,
+                'created_at': phone.created_at,
+                'status': phone.status,
+                'discarded_at': phone.discarded_at
+            } for phone in created_phones]
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'message': 'Error creating phones',
+            'details': str(e)
+        }), 400
+
+@api_bp.route('/SIM_cards/createByBatch', methods=['POST'])
+def create_sim_cards_by_batch():
+    """Create simcards in a batch"""
+    try:
+        data = request.get_json()
+        batch_number = data.get('batch_number')
+        count = data.get('count')
+
+        if not batch_number or not count:
+            return jsonify({
+                'message': 'Missing required parameters',
+                'details': 'batch_number and count are required'
+            }), 400
+
+        created_sim_cards = create_components_by_batch(SimCard, batch_number, count)
+
+        return jsonify({
+            'message': 'SIM cards created successfully',
+            'created_items': [{
+                'SIM_card_ID': sim.id,
+                'created_at': sim.created_at,
+                'status': sim.status,
+                'discarded_at': sim.discarded_at
+            } for sim in created_sim_cards]
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'message': 'Error creating SIM cards',
+            'details': str(e)
+        }), 400
+
+@api_bp.route('/right_sensors/createByBatch', methods=['POST'])
+def create_right_sensors_by_batch():
+    """Create right-sensors in a batch"""
+    try:
+        data = request.get_json()
+        batch_number = data.get('batch_number')
+        count = data.get('count')
+
+        if not batch_number or not count:
+            return jsonify({
+                'message': 'Missing required parameters',
+                'details': 'batch_number and count are required'
+            }), 400
+
+        created_sensors = create_components_by_batch(RightSensor, batch_number, count)
+
+        return jsonify({
+            'message': 'Right sensors created successfully',
+            'created_items': [{
+                'right_sensor_ID': sensor.id,
+                'created_at': sensor.created_at,
+                'status': sensor.status,
+                'discarded_at': sensor.discarded_at
+            } for sensor in created_sensors]
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'message': 'Error creating right sensors',
+            'details': str(e)
+        }), 400
+
+@api_bp.route('/left_sensors/createByBatch', methods=['POST'])
+def create_left_sensors_by_batch():
+    """Create left sensors in a batch"""
+    try:
+        data = request.get_json()
+        batch_number = data.get('batch_number')
+        count = data.get('count')
+
+        if not batch_number or not count:
+            return jsonify({
+                'message': 'Missing required parameters',
+                'details': 'batch_number and count are required'
+            }), 400
+
+        created_sensors = create_components_by_batch(LeftSensor, batch_number, count)
+
+        return jsonify({
+            'message': 'Left sensors created successfully',
+            'created_items': [{
+                'left_sensor_ID': sensor.id,
+                'created_at': sensor.created_at,
+                'status': sensor.status,
+                'discarded_at': sensor.discarded_at
+            } for sensor in created_sensors]
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'message': 'Error creating left sensors',
+            'details': str(e)
+        }), 400
+
+@api_bp.route('/headphones/createByBatch', methods=['POST'])
+def create_headphones_by_batch():
+    """Create headphones in a batch"""
+    try:
+        data = request.get_json()
+        batch_number = data.get('batch_number')
+        count = data.get('count')
+
+        if not batch_number or not count:
+            return jsonify({
+                'message': 'Missing required parameters',
+                'details': 'batch_number and count are required'
+            }), 400
+
+        created_headphones = create_components_by_batch(Headphone, batch_number, count)
+
+        return jsonify({
+            'message': 'Headphones created successfully',
+            'created_items': [{
+                'headphone_ID': headphone.id,
+                'created_at': headphone.created_at,
+                'status': headphone.status,
+                'discarded_at': headphone.discarded_at
+            } for headphone in created_headphones]
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'message': 'Error creating headphones',
+            'details': str(e)
+        }), 400
