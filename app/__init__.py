@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging.handlers import RotatingFileHandler
-import os
+from flask_cors import CORS
 import pymysql
 from dotenv import load_dotenv
 import os
@@ -21,6 +21,8 @@ def create_app():
     Factory function for creating a Flask instance
     """
     app = Flask(__name__)
+
+    CORS(app)
 
     # database connection
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')

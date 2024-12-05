@@ -78,7 +78,6 @@ def create_kit():
 
 @api_bp.route('/kits/disassemble', methods=['POST'])
 def disassemble_kit():
-    """拆解Kit并更新组件状态"""
     try:
         data = request.get_json()
         kit_id = data.get('kit_ID')
@@ -96,7 +95,6 @@ def disassemble_kit():
                 'details': f'Kit {kit_id} does not exist'
             }), 404
             
-        # update components
         updated_components = []
         components = [
             ('phone', kit.phone),
@@ -116,7 +114,6 @@ def disassemble_kit():
                     'status': component.status
                 })
         
-        # update kit status
         kit.status = 'Furbishing'
         
         db.session.commit()

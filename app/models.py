@@ -1,5 +1,6 @@
 from datetime import datetime
 from . import db
+from sqlalchemy.orm import validates
 
 class Kit(db.Model):
 
@@ -10,7 +11,8 @@ class Kit(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     batch_number = db.Column(db.String(255))
     status = db.Column(db.String(50), default='Available')  # Available, Unavailable, Bound, Scrapped, Furbishing, Other
-    distributor = db.Column(db.String(25))
+    distributor_id = db.Column(db.String(20), db.ForeignKey('distributor.id'), nullable=True)
+    distributor_name = db.Column(db.String(255), nullable=True)
     dispense_date = db.Column(db.DateTime)
 
     # The relationship between components and kits, many to one,allow certain lack of a component
@@ -19,6 +21,33 @@ class Kit(db.Model):
     right_sensor = db.relationship('RightSensor', backref='kit', uselist=False)
     left_sensor = db.relationship('LeftSensor', backref='kit', uselist=False)
     headphone = db.relationship('Headphone', backref='kit', uselist=False)
+
+
+    @validates('distributor_id')
+    def validate_distributor_id(self, key, value):
+        """When distributor_id is set, automatically update distributor_name."""
+        distributor = Distributor.query.get(value)
+        if distributor:
+            self.distributor_name = distributor.name
+        else:
+            self.distributor_name = None
+        return value
+
+class Distributor(db.Model):
+    __tablename__ = 'distributor'
+
+    id = db.Column(db.String(20), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    tel = db.Column(db.String(50), nullable=False)
+    address = db.Column(db.String(255), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    contact_person = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='active')  # active, inactive
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    kits = db.relationship('Kit', backref='distributor', lazy=True)
+
 
 class BaseComponent(db.Model):
     """base class for all components"""
@@ -56,6 +85,8 @@ class BaseComponent(db.Model):
             if not component:
                 return None, None, f"Component with id {component_id} not found"
 
+            if component.status == 'in-kit' and status == 'scrapped':
+                return None, None, "Cannot scrap a component currently 'in-kit'"
 
             valid_statuses = ['available', 'in-kit', 'refurbishing', 'scrapped']
             if status not in valid_statuses:

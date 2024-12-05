@@ -3,6 +3,8 @@ from datetime import datetime
 from . import api_bp
 from ..models import Kit
 
+from datetime import datetime
+
 @api_bp.route('/kits/getAll', methods=['GET'])
 def get_all_kits():
     """get all kits"""
@@ -18,6 +20,7 @@ def get_all_kits():
         } for kit in kits]), 200
     except Exception as e:
         return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
+
 
 @api_bp.route('/kits/<string:kit_id>', methods=['GET'])
 def get_kit_by_id(kit_id):
@@ -78,24 +81,24 @@ def get_kits_by_date_range():
     except Exception as e:
         return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
 
-# @api_bp.route('/kits/filterByBatchNumber', methods=['GET'])
-# def get_kits_by_batch_number():
-#     """get kits by batch number"""
-#     try:
-#         batch_number = request.args.get('batchNumber')
-#         kits = Kit.query.filter_by(batch_number=batch_number).all()
-#
-#         if not kits:
-#             return jsonify({'message': 'No kits found with this batch number'}), 404
-#
-#         return jsonify([{
-#             'id': kit.id,
-#             'created_at': kit.created_at,
-#             'status': kit.status,
-#             'batch_number': kit.batch_number
-#         } for kit in kits]), 200
-#     except Exception as e:
-#         return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
+@api_bp.route('/kits/filterByBatchNumber', methods=['GET'])
+def get_kits_by_batch_number():
+    """get kits by batch number"""
+    try:
+        batch_number = request.args.get('batchNumber')
+        kits = Kit.query.filter_by(batch_number=batch_number).all()
+
+        if not kits:
+            return jsonify({'message': 'No kits found with this batch number'}), 404
+
+        return jsonify([{
+            'id': kit.id,
+            'created_at': kit.created_at,
+            'status': kit.status,
+            'batch_number': kit.batch_number
+        } for kit in kits]), 200
+    except Exception as e:
+        return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
 
 @api_bp.route('/kits/filterByStatus', methods=['GET'])
 def get_kits_by_status():
@@ -116,21 +119,30 @@ def get_kits_by_status():
     except Exception as e:
         return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
 
-@api_bp.route('/kits/filterByDistributor', methods=['GET'])
-def get_kits_by_distributor():
-    """根据分销商查询kit"""
+
+@api_bp.route('/kits/filterByDistributorId', methods=['GET'])
+def get_kits_by_distributor_id():
+    """Get kits by distributor ID"""
     try:
-        distributor = request.args.get('distributor')
-        kits = Kit.query.filter_by(distributor=distributor).all()
-        
+        distributor_id = request.args.get('distributorId')
+
+        if not distributor_id:
+            return jsonify({'message': 'Missing distributorId parameter'}), 400
+
+        kits = Kit.query.filter_by(distributor_id=distributor_id).all()
+
         if not kits:
-            return jsonify({'message': 'No kits found for this distributor'}), 404
-            
+            return jsonify({'message': f'No kits found for distributorId {distributor_id}'}), 404
+
         return jsonify([{
             'id': kit.id,
             'created_at': kit.created_at,
             'status': kit.status,
-            'distributor': kit.distributor
+            'batch_number': kit.batch_number,
+            'distributor_id': kit.distributor_id,
+            'distributor_name': kit.distributor_name,
+            'dispense_date': kit.dispense_date
         } for kit in kits]), 200
     except Exception as e:
         return jsonify({'message': 'Error fetching kits', 'details': str(e)}), 500
+
