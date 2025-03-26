@@ -377,3 +377,114 @@ export const distributorService = {
     };
   },
 };
+
+export const dashboardService = {
+  // 获取组件废弃率数据
+  getDiscardRate: async (months) => {
+    try {
+      const response = await api.get("/discard-rate", {
+        params: { months },
+      });
+
+      return response.data.data;
+    } catch (error) {
+      console.error("获取废弃率数据失败:", error);
+      throw {
+        message: "Failed to fetch discard rate data",
+        details: error.message,
+      };
+    }
+  },
+
+  // 处理错误的通用方法
+  handleError: (error) => {
+    if (error.response) {
+      return {
+        message: error.response.data.message || "An error occurred",
+        details: error.response.data.details,
+        status: error.response.status,
+      };
+    }
+    return {
+      message: "Network error occurred",
+      details: error.message,
+      status: 500,
+    };
+  },
+};
+
+export const exportService = {
+  // 导出数据库为JSON格式
+  exportAsJson: async () => {
+    try {
+      // 使用axios直接请求，因为我们需要处理二进制数据响应
+      const response = await axios({
+        url: `${BASE_URL}/exportdb?format=json`,
+        method: "GET",
+        responseType: "blob", // 重要：表示响应是二进制数据
+      });
+
+      // 创建下载链接
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "database_export.json");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      return { success: true };
+    } catch (error) {
+      console.error("导出JSON数据失败:", error);
+      throw {
+        message: "Failed to export database as JSON",
+        details: error.message,
+      };
+    }
+  },
+
+  // 导出数据库为CSV格式（多个CSV文件的压缩包）
+  exportAsCsv: async () => {
+    try {
+      // 使用axios直接请求，因为我们需要处理二进制数据响应
+      const response = await axios({
+        url: `${BASE_URL}/exportdb?format=csv`,
+        method: "GET",
+        responseType: "blob", // 重要：表示响应是二进制数据
+      });
+
+      // 创建下载链接
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "database_export.zip");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      return { success: true };
+    } catch (error) {
+      console.error("导出CSV数据失败:", error);
+      throw {
+        message: "Failed to export database as CSV",
+        details: error.message,
+      };
+    }
+  },
+
+  // 处理错误的通用方法
+  handleError: (error) => {
+    if (error.response) {
+      return {
+        message: error.response.data.message || "An export error occurred",
+        details: error.response.data.details,
+        status: error.response.status,
+      };
+    }
+    return {
+      message: "Network error during export",
+      details: error.message,
+      status: 500,
+    };
+  },
+};
