@@ -95,8 +95,14 @@ function KitList() {
         id: String(kit.id), // 确保id为字符串
       }));
 
-      // 显示所有状态的套件，但确保格式化和ID处理正确
-      setFilteredData(processedData);
+      // 过滤掉状态为"furbishing"的套件
+      const filteredKits = processedData.filter(
+        (kit) => kit.status.toLowerCase() !== "furbishing"
+      );
+      console.log("过滤后的Kits（不包含furbishing状态）:", filteredKits);
+
+      // 设置过滤后的数据
+      setFilteredData(filteredKits);
     } catch (error) {
       setErrorWithTimeout(error.message);
     } finally {
@@ -139,12 +145,24 @@ function KitList() {
         results = await kitService.getAllKits();
       }
 
+      // 确保每个kit有唯一的id且格式一致
+      results = results.map((kit) => ({
+        ...kit,
+        id: String(kit.id), // 确保id为字符串
+      }));
+
       // Apply local filtering for Kit ID if provided
       if (searchKitId) {
         results = results.filter((kit) =>
           kit.id.toLowerCase().includes(searchKitId.toLowerCase())
         );
       }
+
+      // 过滤掉状态为"furbishing"的套件
+      results = results.filter(
+        (kit) => kit.status.toLowerCase() !== "furbishing"
+      );
+      console.log("搜索后过滤的Kits（不包含furbishing状态）:", results);
 
       setFilteredData(results);
     } catch (error) {

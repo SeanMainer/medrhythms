@@ -61,9 +61,9 @@ function Layout() {
           <SvgIcon
             sx={{
               mr: 2,
-              fontSize: "2.5rem",
-              width: 100,
-              height: 40,
+              fontSize: "3rem",
+              width: 120,
+              height: 48,
               cursor: "pointer",
             }}
             viewBox="0 0 252.33 56.59"
