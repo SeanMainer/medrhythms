@@ -9,19 +9,18 @@ class Kit(db.Model):
     id = db.Column(db.String(20), primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    batch_number = db.Column(db.String(255))
-    status = db.Column(db.String(50), default='Available')  # Available, Unavailable, Bound, Scrapped, Furbishing, Other
+    status = db.Column(db.String(50), default='Available')  # Available, Unavailable, In-use, Used
     distributor_id = db.Column(db.String(20), db.ForeignKey('distributor.id'), nullable=True)
     distributor_name = db.Column(db.String(255), nullable=True)
     dispense_date = db.Column(db.DateTime)
 
-    # The relationship between components and kits, many to one,allow certain lack of a component
+    # The relationship between components and kits
     phone = db.relationship('Phone', backref='kit', uselist=False)
     sim_card = db.relationship('SimCard', backref='kit', uselist=False)
     right_sensor = db.relationship('RightSensor', backref='kit', uselist=False)
     left_sensor = db.relationship('LeftSensor', backref='kit', uselist=False)
     headphone = db.relationship('Headphone', backref='kit', uselist=False)
-
+    box = db.relationship('Box', backref='kit', uselist=False)
 
     @validates('distributor_id')
     def validate_distributor_id(self, key, value):
@@ -48,6 +47,31 @@ class Distributor(db.Model):
 
     kits = db.relationship('Kit', backref='distributor', lazy=True)
 
+class ComponentUsage(db.Model):
+    __tablename__ = 'component_usage'
+
+    id = db.Column(db.Integer, primary_key=True)
+    component_id = db.Column(db.String(20), nullable=False)
+    component_type = db.Column(db.String(50), nullable=False)
+    kit_id = db.Column(db.String(20), db.ForeignKey('kit.id'), nullable=True)
+    distributor_id = db.Column(db.String(20), db.ForeignKey('distributor.id'), nullable=True)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=True)
+
+    __table_args__ = (
+        db.Index(
+            'idx_component_usage_composite_key',
+            'component_id',
+            'component_type',
+            'kit_id',
+            db.desc('start_time')
+        ),
+    )
+
+    # kit = db.relationship('Kit', backref='component_usages')
+    # distributor = db.relationship('Distributor', backref='component_usages')
+
+
 
 class BaseComponent(db.Model):
     """base class for all components"""
@@ -56,6 +80,7 @@ class BaseComponent(db.Model):
     id = db.Column(db.String(20), primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     batch_number = db.Column(db.String(255))
+    model_number = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(50), default='available')  # available, in-kit, refurbishing, scrapped
     discarded_at = db.Column(db.DateTime)
     kit_id = db.Column(db.String(20), db.ForeignKey('kit.id'))
@@ -72,7 +97,7 @@ class BaseComponent(db.Model):
         """
         try:
 
-            models = [Phone, SimCard, RightSensor, LeftSensor, Headphone]
+            models = [Phone, SimCard, RightSensor, LeftSensor, Headphone, Box]
             component = None
             component_type = None
 
@@ -87,6 +112,9 @@ class BaseComponent(db.Model):
 
             if component.status == 'in-kit' and status == 'scrapped':
                 return None, None, "Cannot scrap a component currently 'in-kit'"
+
+            if component.status == 'in-kit' and status == 'available':
+                return None, None, "Cannot change a component from 'in-kit' back to 'available'"
 
             valid_statuses = ['available', 'in-kit', 'refurbishing', 'scrapped']
             if status not in valid_statuses:
@@ -118,3 +146,5 @@ class LeftSensor(BaseComponent):
 
 class Headphone(BaseComponent):
     __tablename__ = 'headphone'
+class Box(BaseComponent):
+    __tablename__ = 'box'
