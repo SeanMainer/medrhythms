@@ -55,7 +55,7 @@ def create_distributor():
             tel=data.get('tel'),
             address=data.get('address'),
             city=data.get('city'),
-            contact_person=data.get('contactPerson'),
+            contact_person=data.get('contact_person'),
             status=data.get('status', 'active'),
             created_at=datetime.utcnow()
         )

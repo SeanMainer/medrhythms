@@ -6,4 +6,4 @@ api_bp = Blueprint('api', __name__)
 def home():
     return "Hello World"
 
-from . import kit_routes, component_routes,kit_assembly, distributor,usage_record, export
+from . import kit_routes, component_routes,kit_assembly, distributor,usage_record, export, import_data
