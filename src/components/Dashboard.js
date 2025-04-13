@@ -18,11 +18,17 @@ import {
   CircularProgress,
   Snackbar,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import {
   CloudDownload as DownloadIcon,
   DataObject as JsonIcon,
   TableChart as CsvIcon,
+  CloudUpload as UploadIcon,
 } from "@mui/icons-material";
 import { exportService, dashboardService } from "../services/api";
 import moment from "moment";
@@ -36,6 +42,12 @@ function Dashboard() {
   const [chartData, setChartData] = useState(null);
   const [chartError, setChartError] = useState(null);
   const canvasRef = useRef(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState(null);
+  const [importSuccess, setImportSuccess] = useState(null);
+  const fileInputRef = useRef(null);
 
   // 备用模拟数据 - 当API请求失败时使用
   const mockData = {
@@ -149,7 +161,7 @@ function Dashboard() {
     if (!data || data.length === 0) {
       return {
         avgRate: "0.0",
-        maxRate: "0.0",
+        currentRate: "0.0",
         minRate: "0.0",
         trend: "0.0",
       };
@@ -157,8 +169,15 @@ function Dashboard() {
 
     const rates = data.map((item) => item.rate);
     const avgRate = rates.reduce((acc, val) => acc + val, 0) / rates.length;
-    const maxRate = Math.max(...rates);
     const minRate = Math.min(...rates);
+
+    // 获取当前月份的废弃率
+    const currentMonth = moment().format("MMM");
+    const currentYear = moment().format("YYYY");
+    const currentMonthData = data.find(
+      (item) => item.month === currentMonth && item.year === currentYear
+    );
+    const currentRate = currentMonthData ? currentMonthData.rate : "0.0";
 
     // 计算趋势（与上一个时间段相比）
     const firstHalf = data.slice(0, Math.floor(data.length / 2));
@@ -171,7 +190,7 @@ function Dashboard() {
 
     return {
       avgRate: avgRate.toFixed(1),
-      maxRate: maxRate.toFixed(1),
+      currentRate: currentRate.toFixed(1),
       minRate: minRate.toFixed(1),
       trend: trend.toFixed(1),
     };
@@ -312,6 +331,62 @@ function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, [chartData]);
 
+  const handleImportClick = () => {
+    setImportDialogOpen(true);
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImportFile(file);
+    }
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importFile) {
+      setImportError("Please select a file to import");
+      return;
+    }
+
+    try {
+      setImportLoading(true);
+      setImportError(null);
+      await exportService.importData(importFile);
+      setImportSuccess("Data imported successfully");
+      setImportDialogOpen(false);
+      setImportFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      setImportError(error.message || "Failed to import data");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const handleImportCancel = () => {
+    setImportDialogOpen(false);
+    setImportFile(null);
+    setImportError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      setExportLoading(true);
+      setExportError(null);
+      await exportService.exportAsJson();
+      setExportSuccess("Data exported successfully");
+    } catch (error) {
+      setExportError(error.message || "Failed to export data");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
@@ -319,18 +394,26 @@ function Dashboard() {
       </Typography>
 
       <Grid container spacing={3}>
-        {/* 数据导出卡片 */}
+        {/* 数据库管理卡片 */}
         <Grid item xs={12}>
           <Card sx={{ p: 3, mb: 3 }}>
             <Typography variant="h5" gutterBottom>
-              Database Export
+              Database Import/Export
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Export the complete database in JSON or CSV format. CSV export
-              will be delivered as a ZIP file containing multiple CSV files.
+              Import and export database data. Import only supports JSON format.
+              Please ensure the data format matches the system requirements.
             </Typography>
 
             <Stack direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<UploadIcon />}
+                onClick={handleImportClick}
+              >
+                Import Data
+              </Button>
               <Button
                 variant="contained"
                 color="primary"
@@ -344,7 +427,6 @@ function Dashboard() {
                   "Export as JSON"
                 )}
               </Button>
-
               <Button
                 variant="contained"
                 color="secondary"
@@ -373,6 +455,71 @@ function Dashboard() {
             )}
           </Card>
         </Grid>
+
+        {/* 导入数据对话框 */}
+        <Dialog
+          open={importDialogOpen}
+          onClose={handleImportCancel}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Import Database Data</DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ mb: 2 }}>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Warning: Importing data will update existing records in the
+                database. Please ensure the data is accurate before proceeding.
+              </Alert>
+              Please select a JSON file containing the database data to import.
+              The file must follow the system's data structure requirements.
+            </DialogContentText>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              style={{ display: "none" }}
+            />
+            <Button
+              variant="outlined"
+              component="span"
+              onClick={() => fileInputRef.current?.click()}
+              startIcon={<UploadIcon />}
+              fullWidth
+            >
+              {importFile ? importFile.name : "Select File"}
+            </Button>
+            {importError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {importError}
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleImportCancel} disabled={importLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleImportConfirm}
+              variant="contained"
+              disabled={!importFile || importLoading}
+              startIcon={importLoading ? <CircularProgress size={20} /> : null}
+            >
+              {importLoading ? "Importing..." : "Import"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* 导入成功提示 */}
+        <Snackbar
+          open={!!importSuccess}
+          autoHideDuration={6000}
+          onClose={() => setImportSuccess(null)}
+        >
+          <Alert severity="success" onClose={() => setImportSuccess(null)}>
+            {importSuccess}
+          </Alert>
+        </Snackbar>
 
         {/* 统计卡片 */}
         <Grid item xs={12} md={12}>
@@ -445,10 +592,10 @@ function Dashboard() {
                         color="text.secondary"
                         gutterBottom
                       >
-                        Highest Monthly Rate
+                        Current Month Rate
                       </Typography>
                       <Typography variant="h4" sx={{ fontWeight: "medium" }}>
-                        {chartData && getStats(chartData).maxRate}%
+                        {chartData && getStats(chartData).currentRate}%
                       </Typography>
                     </Paper>
                   </Grid>

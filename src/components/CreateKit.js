@@ -837,7 +837,7 @@ function CreateKit() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Kit ID</TableCell>
-                    <TableCell>Distributor ID</TableCell>
+                    <TableCell>Distributor</TableCell>
                     <TableCell>Start Time</TableCell>
                     <TableCell>End Time</TableCell>
                   </TableRow>
@@ -846,7 +846,7 @@ function CreateKit() {
                   {usageHistory.map((usage) => (
                     <TableRow key={usage.id}>
                       <TableCell>{usage.kit_id || "N/A"}</TableCell>
-                      <TableCell>{usage.distributor_id || "N/A"}</TableCell>
+                      <TableCell>{usage.distributor_name || "N/A"}</TableCell>
                       <TableCell>{formatDateTime(usage.start_time)}</TableCell>
                       <TableCell>{formatDateTime(usage.end_time)}</TableCell>
                     </TableRow>

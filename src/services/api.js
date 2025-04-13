@@ -196,7 +196,25 @@ export const kitService = {
   getComponentUsageHistory: async (componentId) => {
     try {
       const response = await api.get(`/usage/component/${componentId}`);
-      return response.data;
+
+      // 获取所有分销商数据
+      const distributorsResponse = await api.get("/distributors");
+      const distributors = distributorsResponse.data;
+
+      // 创建分销商ID到名称的映射
+      const distributorMap = distributors.reduce((map, distributor) => {
+        map[distributor.id] = distributor.name;
+        return map;
+      }, {});
+
+      // 处理使用历史数据，添加分销商名称
+      const processedData = response.data.map((record) => ({
+        ...record,
+        distributor_name:
+          distributorMap[record.distributor_id] || "Unknown Distributor",
+      }));
+
+      return processedData;
     } catch (error) {
       throw kitService.handleError(error);
     }
@@ -326,7 +344,7 @@ export const distributorService = {
   // Create distributor
   createDistributor: async (distributorData) => {
     try {
-      const response = await api.post("/distributors", distributorData);
+      const response = await api.post("/distributors/create", distributorData);
       return response.data;
     } catch (error) {
       throw distributorService.handleError(error);
@@ -467,6 +485,27 @@ export const exportService = {
       console.error("导出CSV数据失败:", error);
       throw {
         message: "Failed to export database as CSV",
+        details: error.message,
+      };
+    }
+  },
+
+  // 导入数据库数据
+  importData: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("导入数据失败:", error);
+      throw {
+        message: "Failed to import data",
         details: error.message,
       };
     }

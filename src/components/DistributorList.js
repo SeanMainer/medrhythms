@@ -148,7 +148,7 @@ function DistributorList() {
         tel: formData.get("tel"),
         address: formData.get("address"),
         city: formData.get("city"),
-        contactPerson: formData.get("contactPerson"),
+        contact_person: formData.get("contactPerson"),
         status: "active",
       };
 
