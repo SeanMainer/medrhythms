@@ -20,17 +20,17 @@ export const kitService = {
 
       return response.data.map((kit) => ({
         ...kit,
-        // 处理分发商信息：优先级为distributor_name > distributor.name > distributor(字符串)
+        // Process distributor information: priority is distributor_name > distributor.name > distributor (string)
         distributor_name:
           kit.distributor_name ||
           (kit.distributor && typeof kit.distributor === "object"
             ? kit.distributor.name
             : kit.distributor),
-        // 确保所有日期字段都有值或为null
+        // Ensure all date fields have values or are null
         created_at: kit.created_at || null,
-        // 处理可能的不同日期字段名
+        // Handle possible different date field names
         dispense_date: kit.dispense_date || kit.start_time || null,
-        // 确保状态字段的大小写一致
+        // Ensure consistent case for status field
         status: kit.status || "Unknown",
       }));
     } catch (error) {
@@ -197,17 +197,17 @@ export const kitService = {
     try {
       const response = await api.get(`/usage/component/${componentId}`);
 
-      // 获取所有分销商数据
+      // Get all distributor data
       const distributorsResponse = await api.get("/distributors");
       const distributors = distributorsResponse.data;
 
-      // 创建分销商ID到名称的映射
+      // Create a mapping from distributor ID to name
       const distributorMap = distributors.reduce((map, distributor) => {
         map[distributor.id] = distributor.name;
         return map;
       }, {});
 
-      // 处理使用历史数据，添加分销商名称
+      // Process usage history data, add distributor name
       const processedData = response.data.map((record) => ({
         ...record,
         distributor_name:
@@ -240,11 +240,11 @@ export const kitService = {
     try {
       console.log("Calling API to distribute kits:", distributeData);
 
-      // 转换参数名称以匹配后端期望的格式
+      // Convert parameter names to match backend expected format
       const backendData = {
-        kits: distributeData.kit_ids, // 修改为'kits'
+        kits: distributeData.kit_ids, // Change to 'kits'
         distributor_id: distributeData.distributor_id,
-        // 如果有日期，转换为ISO 8601格式
+        // If there is a date, convert to ISO 8601 format
         start_time: distributeData.distribute_date
           ? new Date(distributeData.distribute_date).toISOString()
           : undefined,
@@ -255,9 +255,9 @@ export const kitService = {
       const response = await api.post("/kits/distribute", backendData);
       console.log("API distribute response:", response);
 
-      // 如果分发成功，更新本地Kit数据以正确显示分发商和分发日期
+      // If distribution is successful, update local Kit data to correctly display distributor and distribution date
       if (response.data && response.status === 200) {
-        // 可以选择在这里重新获取所有Kit数据
+        // Optionally fetch all Kit data here
         console.log("分发成功，开始获取更新后的Kit数据");
       }
 
@@ -277,10 +277,10 @@ export const kitService = {
     try {
       console.log("Calling API to collect kits:", collectData);
 
-      // 转换参数名称以匹配后端期望的格式
+      // Convert parameter names to match backend expected format
       const backendData = {
-        kits: collectData.kit_ids, // 确保使用kits作为参数名
-        endTime: collectData.end_time // 确保使用endTime作为参数名
+        kits: collectData.kit_ids, // Ensure using 'kits' as parameter name
+        endTime: collectData.end_time // Ensure using 'endTime' as parameter name
           ? new Date(collectData.end_time).toISOString()
           : undefined,
       };
@@ -397,7 +397,7 @@ export const distributorService = {
 };
 
 export const dashboardService = {
-  // 获取组件废弃率数据
+  // Get component discard rate data
   getDiscardRate: async (months) => {
     try {
       const response = await api.get("/discard-rate", {
@@ -414,7 +414,7 @@ export const dashboardService = {
     }
   },
 
-  // 处理错误的通用方法
+  // Common method for handling errors
   handleError: (error) => {
     if (error.response) {
       return {
@@ -432,17 +432,17 @@ export const dashboardService = {
 };
 
 export const exportService = {
-  // 导出数据库为JSON格式
+  // Export database as JSON format
   exportAsJson: async () => {
     try {
-      // 使用axios直接请求，因为我们需要处理二进制数据响应
+      // Use axios directly for request as we need to handle binary data response
       const response = await axios({
         url: `${BASE_URL}/exportdb?format=json`,
         method: "GET",
-        responseType: "blob", // 重要：表示响应是二进制数据
+        responseType: "blob", // Important: indicates response is binary data
       });
 
-      // 创建下载链接
+      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -461,17 +461,17 @@ export const exportService = {
     }
   },
 
-  // 导出数据库为CSV格式（多个CSV文件的压缩包）
+  // Export database as CSV format (compressed archive of multiple CSV files)
   exportAsCsv: async () => {
     try {
-      // 使用axios直接请求，因为我们需要处理二进制数据响应
+      // Use axios directly for request as we need to handle binary data response
       const response = await axios({
         url: `${BASE_URL}/exportdb?format=csv`,
         method: "GET",
-        responseType: "blob", // 重要：表示响应是二进制数据
+        responseType: "blob", // Important: indicates response is binary data
       });
 
-      // 创建下载链接
+      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -490,7 +490,7 @@ export const exportService = {
     }
   },
 
-  // 导入数据库数据
+  // Import database data
   importData: async (file) => {
     try {
       const formData = new FormData();
@@ -511,7 +511,7 @@ export const exportService = {
     }
   },
 
-  // 处理错误的通用方法
+  // Common method for handling errors
   handleError: (error) => {
     if (error.response) {
       return {

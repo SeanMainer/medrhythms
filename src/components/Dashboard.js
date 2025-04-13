@@ -34,7 +34,7 @@ import { exportService, dashboardService } from "../services/api";
 import moment from "moment";
 
 function Dashboard() {
-  const [timeRange, setTimeRange] = useState("6m"); // 默认显示6个月
+  const [timeRange, setTimeRange] = useState("6m"); // Default to show 6 months
   const [isLoading, setIsLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState(null);
@@ -49,7 +49,7 @@ function Dashboard() {
   const [importSuccess, setImportSuccess] = useState(null);
   const fileInputRef = useRef(null);
 
-  // 备用模拟数据 - 当API请求失败时使用
+  // Fallback mock data - used when API request fails
   const mockData = {
     "12m": [
       { month: "Apr", year: "2023", rate: 4.2 },
@@ -80,18 +80,18 @@ function Dashboard() {
     ],
   };
 
-  // 处理数据导出
+  // Handle data export
   const handleExportJson = async () => {
     try {
       setExportLoading(true);
       setExportError(null);
       await exportService.exportAsJson();
       setExportSuccess("Database exported successfully as JSON");
-      // 5秒后自动清除成功消息
+      // Auto clear success message after 5 seconds
       setTimeout(() => setExportSuccess(null), 5000);
     } catch (error) {
       setExportError(error.message || "Failed to export database");
-      // 5秒后自动清除错误消息
+      // Auto clear error message after 5 seconds
       setTimeout(() => setExportError(null), 5000);
     } finally {
       setExportLoading(false);
@@ -104,18 +104,18 @@ function Dashboard() {
       setExportError(null);
       await exportService.exportAsCsv();
       setExportSuccess("Database exported successfully as CSV");
-      // 5秒后自动清除成功消息
+      // Auto clear success message after 5 seconds
       setTimeout(() => setExportSuccess(null), 5000);
     } catch (error) {
       setExportError(error.message || "Failed to export database");
-      // 5秒后自动清除错误消息
+      // Auto clear error message after 5 seconds
       setTimeout(() => setExportError(null), 5000);
     } finally {
       setExportLoading(false);
     }
   };
 
-  // 从API获取废弃率数据
+  // Fetch discard rate data from API
   const fetchDiscardRateData = async (months) => {
     try {
       setIsLoading(true);
@@ -124,11 +124,11 @@ function Dashboard() {
       const data = await dashboardService.getDiscardRate(months);
       console.log("获取到的废弃率数据:", data);
 
-      // 处理API返回的数据格式
+      // Process API response data format
       const formattedData = data.map((item) => {
         const date = moment(item.month, "YYYY-MM");
         return {
-          month: date.format("MMM"), // 转换为简短月份名称，如Jan, Feb
+          month: date.format("MMM"), // Convert to short month name, e.g. Jan, Feb
           year: date.format("YYYY"),
           rate: item.rate,
           used: item.used,
@@ -138,25 +138,25 @@ function Dashboard() {
 
       setChartData(formattedData);
     } catch (error) {
-      console.error("获取废弃率数据失败:", error);
+      console.error("Failed to fetch data:", error);
       setChartError(error.message || "Failed to fetch discard rate data");
 
-      // 如果API请求失败，使用模拟数据
-      console.log("使用模拟数据作为备用");
+      // If API request fails, use mock data
+      console.log("Using mock data as fallback");
 
-      // 根据timeRange选择对应的模拟数据
+      // Select corresponding mock data based on timeRange
       let monthsNumber = 6;
       if (timeRange === "3m") monthsNumber = 3;
       if (timeRange === "12m") monthsNumber = 12;
 
-      // 使用模拟数据
+      // Use mock data
       setChartData(mockData[timeRange]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 统计信息
+  // Statistics information
   const getStats = (data) => {
     if (!data || data.length === 0) {
       return {
@@ -171,7 +171,7 @@ function Dashboard() {
     const avgRate = rates.reduce((acc, val) => acc + val, 0) / rates.length;
     const minRate = Math.min(...rates);
 
-    // 获取当前月份的废弃率
+    // Get current month's discard rate
     const currentMonth = moment().format("MMM");
     const currentYear = moment().format("YYYY");
     const currentMonthData = data.find(
@@ -179,7 +179,7 @@ function Dashboard() {
     );
     const currentRate = currentMonthData ? currentMonthData.rate : "0.0";
 
-    // 计算趋势（与上一个时间段相比）
+    // Calculate trend (compared to previous time period)
     const firstHalf = data.slice(0, Math.floor(data.length / 2));
     const secondHalf = data.slice(Math.floor(data.length / 2));
     const firstHalfAvg =
@@ -203,24 +203,24 @@ function Dashboard() {
     const ctx = canvas.getContext("2d");
     const data = chartData;
 
-    // 设置画布大小
+    // Set canvas size
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 图表参数
+    // Chart parameters
     const padding = 40;
     const chartWidth = canvas.width - 2 * padding;
     const chartHeight = canvas.height - 2 * padding;
     const barWidth = (chartWidth / data.length) * 0.6;
     const barSpacing = (chartWidth / data.length) * 0.4;
 
-    // Y轴最大值（向上取整到下一个整数)
+    // Y-axis maximum value (rounded up to next integer)
     const maxRate = Math.ceil(Math.max(...data.map((item) => item.rate)));
-    const yAxisMax = Math.max(maxRate + 1, 6); // 至少到6%
+    const yAxisMax = Math.max(maxRate + 1, 6); // At least up to 6%
 
-    // 绘制X轴和Y轴
+    // Draw X and Y axes
     ctx.beginPath();
     ctx.moveTo(padding, padding);
     ctx.lineTo(padding, canvas.height - padding);
@@ -228,19 +228,19 @@ function Dashboard() {
     ctx.strokeStyle = "#ccc";
     ctx.stroke();
 
-    // 绘制Y轴刻度
+    // Draw Y-axis scale
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#666";
-    // 修改：只在0%, 10%, 20%...处显示标签，但保持一定的网格线密度
-    const yAxisStep = 10; // 标签步长改为10%
-    const gridStep = 2; // 网格线步长为2%
+    // Modified: Only show labels at 0%, 10%, 20%... but maintain grid line density
+    const yAxisStep = 10; // Label step changed to 10%
+    const gridStep = 2; // Grid line step is 2%
 
-    // 先绘制所有网格线
+    // Draw all grid lines first
     for (let i = 0; i <= yAxisMax; i += gridStep) {
       const y = canvas.height - padding - (i / yAxisMax) * chartHeight;
 
-      // 绘制网格线
+      // Draw grid line
       ctx.beginPath();
       ctx.moveTo(padding, y);
       ctx.lineTo(canvas.width - padding, y);
@@ -248,24 +248,24 @@ function Dashboard() {
       ctx.stroke();
     }
 
-    // 再绘制主要刻度和标签
+    // Then draw main scale and labels
     for (let i = 0; i <= yAxisMax; i += yAxisStep) {
       const y = canvas.height - padding - (i / yAxisMax) * chartHeight;
 
-      // 绘制刻度线
+      // Draw scale line
       ctx.beginPath();
       ctx.moveTo(padding - 5, y);
       ctx.lineTo(padding, y);
       ctx.strokeStyle = "#ccc";
       ctx.stroke();
 
-      // 添加标签
+      // Add label
       ctx.fillText(`${i}%`, padding - 10, y);
     }
 
     ctx.strokeStyle = "#ccc";
 
-    // 绘制条形图和X轴标签
+    // Draw bar chart and X-axis labels
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
@@ -274,15 +274,15 @@ function Dashboard() {
       const barHeight = (item.rate / yAxisMax) * chartHeight;
       const y = canvas.height - padding - barHeight;
 
-      // 条形图
+      // Bar chart
       ctx.fillStyle = "#3f51b5";
       ctx.fillRect(x, y, barWidth, barHeight);
 
-      // 数据值
+      // Data value
       ctx.fillStyle = "#000";
       ctx.fillText(`${item.rate}%`, x + barWidth / 2, y - 20);
 
-      // X轴标签
+      // X-axis label
       ctx.fillText(
         `${item.month}`,
         x + barWidth / 2,
@@ -295,7 +295,7 @@ function Dashboard() {
       );
     });
 
-    // 添加标题
+    // Add title
     ctx.textAlign = "center";
     ctx.fillStyle = "#333";
     ctx.font = "bold 16px Arial";
@@ -303,23 +303,23 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    // 从时间范围获取月份数
+    // Get number of months from time range
     let months = 6;
     if (timeRange === "3m") months = 3;
     if (timeRange === "12m") months = 12;
 
-    // 调用API获取数据
+    // Call API to fetch data
     fetchDiscardRateData(months);
   }, [timeRange]);
 
-  // 当数据加载完成或改变时重新渲染图表
+  // Re-render chart when data loading is complete or data changes
   useEffect(() => {
     if (chartData && !isLoading) {
       renderChart();
     }
   }, [chartData, isLoading]);
 
-  // 当窗口大小改变时重新渲染图表
+  // Re-render chart when window size changes
   useEffect(() => {
     const handleResize = () => {
       if (chartData) {
@@ -394,7 +394,7 @@ function Dashboard() {
       </Typography>
 
       <Grid container spacing={3}>
-        {/* 数据库管理卡片 */}
+        {/* Database Management Cards */}
         <Grid item xs={12}>
           <Card sx={{ p: 3, mb: 3 }}>
             <Typography variant="h5" gutterBottom>
@@ -456,7 +456,7 @@ function Dashboard() {
           </Card>
         </Grid>
 
-        {/* 导入数据对话框 */}
+        {/* Import Data Dialog */}
         <Dialog
           open={importDialogOpen}
           onClose={handleImportCancel}
@@ -510,7 +510,7 @@ function Dashboard() {
           </DialogActions>
         </Dialog>
 
-        {/* 导入成功提示 */}
+        {/* Import Successful Prompt */}
         <Snackbar
           open={!!importSuccess}
           autoHideDuration={6000}
@@ -521,7 +521,7 @@ function Dashboard() {
           </Alert>
         </Snackbar>
 
-        {/* 统计卡片 */}
+        {/* Statistics Card */}
         <Grid item xs={12} md={12}>
           <Card sx={{ p: 3, mb: 3 }}>
             <Box
@@ -560,7 +560,6 @@ function Dashboard() {
               </Alert>
             )}
 
-            {/* 统计指标 */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
               {isLoading ? (
                 <Grid item xs={12}>
@@ -631,7 +630,7 @@ function Dashboard() {
               )}
             </Grid>
 
-            {/* 图表 */}
+            {/* graphs */}
             <Box sx={{ width: "100%", height: 400, position: "relative" }}>
               <canvas
                 ref={canvasRef}

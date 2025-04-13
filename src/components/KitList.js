@@ -65,7 +65,7 @@ function KitList() {
   const [collectKits, setCollectKits] = useState([]);
   const [collectDate, setCollectDate] = useState(moment());
 
-  // 组件卸载时清除timeout
+  // Clear timeout when component unmounts
   useEffect(() => {
     return () => {
       if (errorTimeout) {
@@ -87,21 +87,20 @@ function KitList() {
     try {
       setLoading(true);
       const data = await kitService.getAllKits();
-      console.log("获取到的所有Kits:", data);
+      console.log("fetch all Kits:", data);
 
-      // 确保每个kit有唯一的id且格式一致
+      // Ensure each kit has a unique ID with consistent format
       const processedData = data.map((kit) => ({
         ...kit,
-        id: String(kit.id), // 确保id为字符串
+        id: String(kit.id),
       }));
 
-      // 过滤掉状态为"furbishing"的套件
       const filteredKits = processedData.filter(
         (kit) => kit.status.toLowerCase() !== "furbishing"
       );
-      console.log("过滤后的Kits（不包含furbishing状态）:", filteredKits);
+      console.log("Filtered Kits (excluding furbishing status):", filteredKits);
 
-      // 设置过滤后的数据
+      // Set filtered data
       setFilteredData(filteredKits);
     } catch (error) {
       setErrorWithTimeout(error.message);
@@ -145,10 +144,9 @@ function KitList() {
         results = await kitService.getAllKits();
       }
 
-      // 确保每个kit有唯一的id且格式一致
       results = results.map((kit) => ({
         ...kit,
-        id: String(kit.id), // 确保id为字符串
+        id: String(kit.id),
       }));
 
       // Apply local filtering for Kit ID if provided
@@ -158,11 +156,11 @@ function KitList() {
         );
       }
 
-      // 过滤掉状态为"furbishing"的套件
+      // Filter out kits with status 'furbishing'
       results = results.filter(
         (kit) => kit.status.toLowerCase() !== "furbishing"
       );
-      console.log("搜索后过滤的Kits（不包含furbishing状态）:", results);
+      console.log("results without furbishing status:", results);
 
       setFilteredData(results);
     } catch (error) {
@@ -180,7 +178,7 @@ function KitList() {
       return;
     }
 
-    // 确保所有选中的kit都存在于数据中
+    // Ensure all selected kits exist in the data
     const validKitIds = selectedKits.filter((kitId) =>
       filteredData.some((kit) => String(kit.id) === String(kitId))
     );
@@ -190,13 +188,11 @@ function KitList() {
       return;
     }
 
-    // 只允许分发Available状态的套件
     const availableKits = validKitIds.filter((kitId) => {
       const kit = filteredData.find((k) => String(k.id) === String(kitId));
       return kit && (kit.status === "Available" || kit.status === "available");
     });
 
-    // 检查是否有不可分发的套件被选中
     if (availableKits.length !== validKitIds.length) {
       setErrorWithTimeout(
         "Only Available kits can be distributed. Please deselect unavailable kits."
@@ -217,10 +213,8 @@ function KitList() {
       setLoading(true);
       setError(null);
 
-      // 确保所有ID都是字符串
       const kitIdsToDistribute = selectedKits.map((id) => String(id));
 
-      // 最后再次验证所有选中的kit是否处于可分发状态
       const allAvailable = kitIdsToDistribute.every((kitId) => {
         const kit = filteredData.find((k) => String(k.id) === kitId);
         return (
@@ -236,29 +230,27 @@ function KitList() {
         return;
       }
 
-      // 日期格式化为ISO字符串或者不传递
       let formattedDate = undefined;
       if (distributeDate) {
         formattedDate = distributeDate.toISOString();
-        console.log("格式化后的日期:", formattedDate);
+        console.log("format data:", formattedDate);
       }
 
-      console.log("准备分发套件:", {
-        kit_ids: kitIdsToDistribute,
+      console.log("preparing distributing kits:", {
+        kits: kitIdsToDistribute,
         distributor_id: selectedDistributor,
         distribute_date: formattedDate || "current time",
       });
 
-      // 创建请求数据对象
+      // Create request data object
       const requestData = {
-        kit_ids: kitIdsToDistribute,
+        kits: kitIdsToDistribute,
         distributor_id: selectedDistributor,
         distribute_date: formattedDate,
       };
 
-      // 直接使用API调用
       const result = await kitService.distributeKits(requestData);
-      console.log("分发结果:", result);
+      console.log("Distribution result:", result);
 
       if (result && result.message) {
         setSuccessMessageWithTimeout(
@@ -271,13 +263,12 @@ function KitList() {
         // Refresh kits list
         await fetchKits();
       } else {
-        // 处理API返回但没有提供message的情况
         setErrorWithTimeout(
           "Distribution completed but no confirmation message received"
         );
       }
     } catch (error) {
-      console.error("分发kit时出错:", error);
+      console.error("Error when distributing kits:", error);
       setErrorWithTimeout(error.message || "Failed to distribute kits");
     } finally {
       setLoading(false);
@@ -285,7 +276,7 @@ function KitList() {
   };
 
   const handleCollectDialogOpen = (kit) => {
-    // 检查kit状态是否允许收集
+    // Check if kit status allows collection
     if (kit.status !== "In-use") {
       setErrorWithTimeout(
         `Kit ${kit.id} cannot be collected. Only In-use kits can be collected.`
@@ -302,7 +293,7 @@ function KitList() {
       setLoading(true);
       setError(null);
 
-      // 最后再次验证所有选中的kit是否处于可收集状态
+      // verify again if all selected kits are in a collectable state
       const allInUse = collectKits.every((kitId) => {
         const kit = filteredData.find((k) => String(k.id) === String(kitId));
         return kit && kit.status === "In-use";
@@ -316,14 +307,14 @@ function KitList() {
         return;
       }
 
-      console.log("准备收集套件:", {
-        kit_ids: collectKits,
-        end_time: collectDate.toISOString(),
+      console.log("Preparing to collect kits:", {
+        kits: collectKits,
+        endTime: collectDate.toISOString(),
       });
 
       const result = await kitService.collectKits({
-        kit_ids: collectKits,
-        end_time: collectDate.toISOString(),
+        kits: collectKits,
+        endTime: collectDate.toISOString(),
       });
 
       if (result && result.message) {
@@ -341,7 +332,7 @@ function KitList() {
         );
       }
     } catch (error) {
-      console.error("收集kit时出错:", error);
+      console.error("Error when collecting kit:", error);
       setErrorWithTimeout(error.message || "Failed to collect kits");
     } finally {
       setLoading(false);
@@ -389,16 +380,16 @@ function KitList() {
       headerName: "Distributor",
       flex: 1,
       renderCell: (params) => {
-        console.log("渲染分发商信息:", params.row);
+        console.log("Rendering distributor information:", params.row);
 
-        // 检查多种可能的字段名
+        // Check multiple possible field names
         if (
           params.row.status === "Bound" ||
           params.row.status === "In-use" ||
           params.row.status === "Used"
         ) {
-          // 首先尝试distributor_name，如果为空则尝试distributor对象的name属性
-          // 如果这两个都不存在，则尝试distributor字段(它可能是直接存储的字符串)
+          // First try distributor_name, if empty then try the name property of the distributor object
+          // If neither exists, try the distributor field (it might be a direct string)
           const distributorValue =
             params.row.distributor_name ||
             (params.row.distributor &&
@@ -406,13 +397,13 @@ function KitList() {
               ? params.row.distributor.name
               : params.row.distributor);
 
-          // 为"Used"状态添加标记
+          // Add marker for "Used" status
           if (params.row.status === "Used" && distributorValue) {
             return (
               <Box sx={{ display: "flex", alignItems: "center", opacity: 0.7 }}>
                 <span>{distributorValue}</span>
                 <span style={{ marginLeft: "4px", fontSize: "0.75rem" }}>
-                  (收集完成)
+                  (Collection completed)
                 </span>
               </Box>
             );
@@ -442,17 +433,17 @@ function KitList() {
       headerName: "Distribute Date",
       flex: 1,
       renderCell: (params) => {
-        console.log("渲染分发日期信息:", params.row);
+        console.log("Rendering distribution date information:", params.row);
 
-        // 首先尝试从dispense_date字段获取
+        // First try to get from dispense_date field
         let dateValue = params.row.dispense_date;
 
-        // 如果没有dispense_date，尝试其他可能的字段
+        // If no dispense_date, try other possible fields
         if (!dateValue) {
           dateValue = params.row.start_time || params.row.distribute_date;
         }
 
-        // 如果状态是"In-use"或"Used"但没有找到日期，尝试使用created_at作为后备
+        // If status is "In-use" or "Used" but no date found, try using created_at as fallback
         if (
           !dateValue &&
           (params.row.status === "In-use" ||
@@ -467,14 +458,14 @@ function KitList() {
         try {
           let formattedDate = moment(dateValue).format("YYYY-MM-DD HH:mm:ss");
 
-          // 为"Used"状态添加额外的样式
+          // Add additional style for "Used" status
           if (params.row.status === "Used") {
             return <Box sx={{ opacity: 0.7 }}>{formattedDate}</Box>;
           }
 
           return formattedDate;
         } catch (error) {
-          console.error("日期格式化错误:", error);
+          console.error("Date formatting error:", error);
           return "-";
         }
       },
@@ -492,7 +483,7 @@ function KitList() {
 
         const isUsed = params.row.status === "Used";
 
-        // 统一按钮样式和大小
+        // Unify button style and size
         const buttonStyle = { minWidth: "110px" };
 
         if (isAvailable || isUsed) {
@@ -529,7 +520,6 @@ function KitList() {
   ];
 
   const handleDissemble = (kit) => {
-    // 检查kit状态是否允许拆解
     if (
       kit.status !== "Available" &&
       kit.status !== "available" &&
@@ -549,12 +539,12 @@ function KitList() {
     try {
       setLoading(true);
 
-      // 处理批量拆解
+      // Handle batch disassembly
       if (selectedKit?.batchDissemble && selectedKit.batchIds?.length > 0) {
         let successCount = 0;
         let failedCount = 0;
 
-        // 最后再次验证所有kit的状态
+        // Verify all kit statuses one final time
         const invalidKits = selectedKit.batchIds.filter((kitId) => {
           const kit = filteredData.find((k) => String(k.id) === String(kitId));
           return (
@@ -575,7 +565,7 @@ function KitList() {
           return;
         }
 
-        // 逐个拆解所有选中的套件
+        // Disassemble all selected kits one by one
         for (const kitId of selectedKit.batchIds) {
           try {
             const result = await kitService.disassembleKit(kitId);
@@ -600,7 +590,7 @@ function KitList() {
           setErrorWithTimeout(`Failed to disassemble any kits`);
         }
       }
-      // 处理单个拆解
+      // Handle single disassembly
       else {
         const result = await kitService.disassembleKit(selectedKit.id);
         if (result.message === "Kit disassembled successfully") {
@@ -620,15 +610,15 @@ function KitList() {
   };
 
   const setErrorWithTimeout = (errorMessage) => {
-    // 清除已存在的timeout
+    // Clear existing timeout
     if (errorTimeout) {
       clearTimeout(errorTimeout);
     }
 
-    // 设置错误信息
+    // Set error message
     setError(errorMessage);
 
-    // 设置新的timeout，5秒后自动清除错误
+    // Set new timeout to clear error after 5 seconds
     const timeout = setTimeout(() => {
       setError(null);
     }, 5000);
@@ -637,15 +627,15 @@ function KitList() {
   };
 
   const setSuccessMessageWithTimeout = (message) => {
-    // 清除已存在的timeout
+    // Clear existing timeout
     if (successTimeout) {
       clearTimeout(successTimeout);
     }
 
-    // 设置成功信息
+    // Set success message
     setSuccessMessage(message);
 
-    // 设置新的timeout，5秒后自动清除成功消息
+    // Set new timeout to clear success message after 5 seconds
     const timeout = setTimeout(() => {
       setSuccessMessage(null);
     }, 5000);
@@ -750,7 +740,7 @@ function KitList() {
               color="secondary"
               startIcon={<CollectIcon />}
               onClick={() => {
-                // 过滤出In-use状态的套件
+                // Filter out kits with In-use status
                 const inUseKits = selectedKits.filter((kitId) => {
                   const kit = filteredData.find(
                     (k) => String(k.id) === String(kitId)
@@ -758,7 +748,7 @@ function KitList() {
                   return kit && kit.status === "In-use";
                 });
 
-                // 如果没有In-use状态的套件被选中
+                // If no In-use kits are selected
                 if (inUseKits.length === 0) {
                   setErrorWithTimeout(
                     "Please select at least one In-use kit to collect"
@@ -766,7 +756,7 @@ function KitList() {
                   return;
                 }
 
-                // 检查是否选择了错误状态的套件
+                // Check if any kits with invalid status are selected
                 if (inUseKits.length !== selectedKits.length) {
                   setErrorWithTimeout(
                     "Only In-use kits can be collected. Please deselect other kits."
@@ -788,7 +778,7 @@ function KitList() {
               color="error"
               startIcon={<BuildIcon />}
               onClick={() => {
-                // 过滤出可拆解状态的套件(Available或Used)
+                // Filter out kits that can be disassembled (Available or Used)
                 const dissembleKits = selectedKits.filter((kitId) => {
                   const kit = filteredData.find(
                     (k) => String(k.id) === String(kitId)
@@ -808,7 +798,7 @@ function KitList() {
                   return;
                 }
 
-                // 检查是否选择了错误状态的套件
+                // Check if any kits with invalid status are selected
                 if (dissembleKits.length !== selectedKits.length) {
                   setErrorWithTimeout(
                     "Only Available and Used kits can be dissembled. Please deselect other kits."
@@ -816,12 +806,12 @@ function KitList() {
                   return;
                 }
 
-                // 创建确认对话框文本
+                // Create confirmation dialog text
                 const confirmMessage = `Are you sure you want to dissemble ${
                   dissembleKits.length
                 } kit${dissembleKits.length !== 1 ? "s" : ""}?`;
 
-                // 设置要拆解的套件
+                // Set kits to be disassembled
                 setSelectedKit({
                   id: dissembleKits[0],
                   batchDissemble: true,
