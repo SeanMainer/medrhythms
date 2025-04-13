@@ -6,11 +6,6 @@
 
 This is a Flask-based backend system for inventory management, focusing on tracking and managing kits and their components as well as distributors.
 
-## Repository Information
-
-- Git Repository: `git@github.com:lm-huang/capstone.git`
-- Branch: `lastBackend`
-
 ## Project Structure
 
 ```
@@ -37,6 +32,9 @@ flaskCapstone/
 └── requirements.txt          # Python dependencies
 ```
 
+## Project API Documentation
+[API Documentation](api_documentation.md)
+
 ## Installation and Setup
 
 ### Prerequisites
@@ -46,13 +44,7 @@ flaskCapstone/
 
 ### Installation Steps
 
-1. Clone the repository and switch to the `lastBackend` branch:
-
-```bash
-git clone git@github.com:lm-huang/capstone.git
-cd capstone
-git checkout lastBackend
-```
+1. Clone the repository 
 
 2. Create a virtual environment and activate it:
 
