@@ -36,7 +36,7 @@ function DistributorList() {
   const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
 
-  // Load initial data
+  // Load data
   useEffect(() => {
     fetchDistributors();
   }, []);
