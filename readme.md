@@ -1,5 +1,104 @@
+<!-- @format -->
 
-1. Create a schema/database in your MySQL with the name `inventory_db`. 
+# Inventory Management System
+
+## Project Overview
+
+This is a Flask-based backend system for inventory management, focusing on tracking and managing kits and their components as well as distributors.
+
+## Repository Information
+
+- Git Repository: `git@github.com:lm-huang/capstone.git`
+- Branch: `lastBackend`
+
+## Project Structure
+
+```
+flaskCapstone/
+├── app/                      # Main application directory
+│   ├── api/                  # API route handlers
+│   │   ├── __init__.py       # API blueprint initialization
+│   │   ├── component_routes.py  # Component-related endpoints
+│   │   ├── distributor.py    # Distributor-related endpoints
+│   │   ├── export.py         # Data export functionality
+│   │   ├── import_data.py    # Data import functionality
+│   │   ├── kit_assembly.py   # Kit assembly operations
+│   │   ├── kit_routes.py     # Kit-related endpoints
+│   │   └── usage_record.py   # Usage tracking
+│   ├── __init__.py           # Flask application factory
+│   ├── models.py             # Database models
+│   └── run.py                # Application entry point
+├── logs/                     # Application logs
+├── static/                   # Static files (CSS, JS, etc.)
+├── templates/                # HTML templates
+├── .env                      # Environment variables
+├── .gitignore                # Git ignore file
+├── readme.md                 # Project documentation
+└── requirements.txt          # Python dependencies
+```
+
+## Installation and Setup
+
+### Prerequisites
+
+- Python 3.8 or higher
+- MySQL 5.7 or higher
+
+### Installation Steps
+
+1. Clone the repository and switch to the `lastBackend` branch:
+
+```bash
+git clone git@github.com:lm-huang/capstone.git
+cd capstone
+git checkout lastBackend
+```
+
+2. Create a virtual environment and activate it:
+
+```bash
+python -m venv .venv
+# On Windows
+.venv\Scripts\activate
+# On macOS/Linux
+source .venv/bin/activate
+```
+
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Create a schema/database in your MySQL with the name `inventory_db`:
+
+```mysql
+CREATE DATABASE inventory_db;
+```
+
+5. Create a `.env` file in your root directory, and add this line:
+
+```bash
+DATABASE_URL=mysql+pymysql://username:password@localhost:3306/inventory_db
+```
+
+Replace `username` and `password` with your MySQL credentials.
+
+6. Run the application:
+
+```bash
+python app/run.py
+```
+
+## API Testing
+
+The API will be available at `http://127.0.0.1:5000/api`. You can test the endpoints using Postman or any API testing tool.
+
+## Manual Database Setup
+
+If tables are not created automatically, you can use the SQL provided below.
+
+1. Create a schema/database in your MySQL with the name `inventory_db`.
 
 ```mysql
 CREATE DATABASE inventory_db;
@@ -11,11 +110,11 @@ CREATE DATABASE inventory_db;
 DATABASE_URL=mysql+pymysql://{your mysql password}@localhost:3306/inventory_db
 ```
 
-Notice that you need to use your own MySQL password and confirm your port number. By default, MySQL database should be on port 3306, but change the port number if necessary 
+Notice that you need to use your own MySQL password and confirm your port number. By default, MySQL database should be on port 3306, but change the port number if necessary
 
 3. Execute `app/run.py` and test API on Postman
 
-   I did not explicitly assign a port for Flask. Flask will tell you the backend port in the console. It will look like this: 
+   I did not explicitly assign a port for Flask. Flask will tell you the backend port in the console. It will look like this:
 
 ```bash
 [2024-11-26 19:10:17,304] INFO in __init__: Inventory Management System startup
@@ -23,9 +122,9 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://127.0.0.1:5000
 ```
 
-​	Except for Postman, you can test the index by adding a suffix `/api` to the given link and opening it in the browser, like this http://127.0.0.1:5000/api. Ideally, you should see Hello World.
+​ Except for Postman, you can test the index by adding a suffix `/api` to the given link and opening it in the browser, like this http://127.0.0.1:5000/api. Ideally, you should see Hello World.
 
-​	I noticed that sometimes the database may fail to create tables, and there is no warning at all. If this happens to you, you can create tables manually in the database. I provide the SQL lines here for reference:
+​ I noticed that sometimes the database may fail to create tables, and there is no warning at all. If this happens to you, you can create tables manually in the database. I provide the SQL lines here for reference:
 
 ```sql
 CREATE TABLE distributor (
@@ -104,4 +203,3 @@ CREATE TABLE headphone (
 
 
 ```
-
