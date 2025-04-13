@@ -90,31 +90,7 @@ Replace `username` and `password` with your MySQL credentials.
 python app/run.py
 ```
 
-## API Testing
-
-The API will be available at `http://127.0.0.1:5000/api`. You can test the endpoints using Postman or any API testing tool.
-
-## Manual Database Setup
-
-If tables are not created automatically, you can use the SQL provided below.
-
-1. Create a schema/database in your MySQL with the name `inventory_db`.
-
-```mysql
-CREATE DATABASE inventory_db;
-```
-
-2. Create a `.env` file in your root directory, and add this line:
-
-```bash
-DATABASE_URL=mysql+pymysql://{your mysql password}@localhost:3306/inventory_db
-```
-
-Notice that you need to use your own MySQL password and confirm your port number. By default, MySQL database should be on port 3306, but change the port number if necessary
-
-3. Execute `app/run.py` and test API on Postman
-
-   I did not explicitly assign a port for Flask. Flask will tell you the backend port in the console. It will look like this:
+I did not explicitly assign a port for Flask. Flask will tell you the backend port in the console. It will look like this:
 
 ```bash
 [2024-11-26 19:10:17,304] INFO in __init__: Inventory Management System startup
@@ -122,7 +98,13 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://127.0.0.1:5000
 ```
 
-​ Except for Postman, you can test the index by adding a suffix `/api` to the given link and opening it in the browser, like this http://127.0.0.1:5000/api. Ideally, you should see Hello World.
+## API Testing
+
+The API will be available at `http://127.0.0.1:5000/api`. You can test the endpoints using Postman or any API testing tool.
+
+Except for Postman, you can test the index by adding a suffix `/api` to the given link and opening it in the browser, like this http://127.0.0.1:5000/api. Ideally, you should see Hello World.
+
+## Manual Database Setup
 
 ​ I noticed that sometimes the database may fail to create tables, and there is no warning at all. If this happens to you, you can create tables manually in the database. I provide the SQL lines here for reference:
 
@@ -139,22 +121,35 @@ CREATE TABLE distributor (
                              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE component_usage (
+                                 id INT AUTO_INCREMENT PRIMARY KEY,
+                                 component_id VARCHAR(20) NOT NULL,
+                                 component_type VARCHAR(50) NOT NULL,
+                                 kit_id VARCHAR(20),
+                                 distributor_id VARCHAR(20),
+                                 start_time DATETIME,
+                                 end_time DATETIME
+#                                  FOREIGN KEY (kit_id) REFERENCES kit(id) ON DELETE SET NULL,
+#                                  FOREIGN KEY (distributor_id) REFERENCES distributor(id) ON DELETE SET NULL
+);
+
 CREATE TABLE kit (
                      id VARCHAR(20) PRIMARY KEY,
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-                     batch_number VARCHAR(255),
-                     status VARCHAR(50) DEFAULT 'Available', -- Available, Unavailable, Bound, Scrapped, Furbishing, Other
+                     status VARCHAR(50) DEFAULT 'Available', -- Available, Unavailable, In-use, Other
                      distributor_id VARCHAR(20),
                      distributor_name VARCHAR(255),
                      dispense_date DATETIME,
                      FOREIGN KEY (distributor_id) REFERENCES distributor(id)
 );
 
+
 CREATE TABLE phone (
                        id VARCHAR(20) PRIMARY KEY,
                        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                        batch_number VARCHAR(255),
+                       model_number VARCHAR(100) NOT NULL,
                        status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
                        discarded_at DATETIME,
                        kit_id VARCHAR(20),
@@ -165,6 +160,7 @@ CREATE TABLE sim_card (
                           id VARCHAR(20) PRIMARY KEY,
                           created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                           batch_number VARCHAR(255),
+                          model_number VARCHAR(100) NOT NULL,
                           status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
                           discarded_at DATETIME,
                           kit_id VARCHAR(20),
@@ -175,6 +171,7 @@ CREATE TABLE right_sensor (
                               id VARCHAR(20) PRIMARY KEY,
                               created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               batch_number VARCHAR(255),
+                              model_number VARCHAR(100) NOT NULL,
                               status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
                               discarded_at DATETIME,
                               kit_id VARCHAR(20),
@@ -185,6 +182,7 @@ CREATE TABLE left_sensor (
                              id VARCHAR(20) PRIMARY KEY,
                              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                              batch_number VARCHAR(255),
+                             model_number VARCHAR(100) NOT NULL,
                              status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
                              discarded_at DATETIME,
                              kit_id VARCHAR(20),
@@ -195,11 +193,27 @@ CREATE TABLE headphone (
                            id VARCHAR(20) PRIMARY KEY,
                            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            batch_number VARCHAR(255),
+                           model_number VARCHAR(100) NOT NULL,
                            status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
                            discarded_at DATETIME,
                            kit_id VARCHAR(20),
                            FOREIGN KEY (kit_id) REFERENCES kit(id)
 );
+
+CREATE TABLE box (
+                     id VARCHAR(20) PRIMARY KEY,
+                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                     batch_number VARCHAR(255),
+                     model_number VARCHAR(100) NOT NULL,
+                     status VARCHAR(50) DEFAULT 'available', -- available, in-kit, refurbishing, scrapped
+                     discarded_at DATETIME,
+                     kit_id VARCHAR(20),
+                     FOREIGN KEY (kit_id) REFERENCES kit(id)
+);
+
+
+CREATE INDEX idx_component_usage_composite_key
+    ON component_usage (component_id, component_type, kit_id, start_time DESC);
 
 
 ```
