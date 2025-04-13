@@ -1,3 +1,4 @@
+
 1. Create a schema/database in your MySQL with the name `inventory_db`. 
 
 ```mysql

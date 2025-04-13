@@ -45,12 +45,11 @@ def get_usage_by_component(component_id):
 @api_bp.route('/discard-rate', methods=['GET'])
 def get_discard_rate():
     try:
-        # 获取时间范围参数，例如 ?months=6
+        # Get time range parameters, for example ?months=6"
         months = int(request.args.get('months', 6))
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=30 * months)
 
-        # 所有组件模型
         component_models = [
             ('phone', Phone),
             ('sim_card', SimCard),
@@ -60,7 +59,7 @@ def get_discard_rate():
             ('box', Box),
         ]
 
-        # 每月的统计结果
+        # result set
         monthly_stats = {}
 
         for i in range(months):
@@ -68,7 +67,7 @@ def get_discard_rate():
             month_end = (month_start + timedelta(days=32)).replace(day=1)
             key = month_start.strftime("%Y-%m")
 
-            # 回收数量：component_usage.end_time 在时间段内
+            # Collection quantity: component_usage.end_time within the time period
             collected_count = db.session.query(func.count(ComponentUsage.id)).filter(
                 ComponentUsage.end_time != None,
                 ComponentUsage.end_time >= month_start,
@@ -91,7 +90,7 @@ def get_discard_rate():
                 "rate": rate
             }
 
-        # 按时间排序结果
+        # Sort results by time
         sorted_stats = [
             {"month": key, **monthly_stats[key]}
             for key in sorted(monthly_stats.keys())
