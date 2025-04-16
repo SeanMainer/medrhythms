@@ -23,4 +23,4 @@ serve -s build
 
 ## Overview
 
-This is a standard React frontend project built with Create React App. Follow the instructions above to install dependencies and run the application.
+This is a standard React frontend project built with Create React App. This Frontend (React) app connects to ➝ Backend (Flask API) (hint: see 'backend' branch which talks to the ➝ Database (MySQL). Follow the instructions above to install dependencies and run the application. 
